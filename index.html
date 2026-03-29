@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Progress Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== SIDEBAR NAV ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">◈</span>
+      <span class="brand-text">LOGBOOK</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-view="dashboard">
+        <span class="nav-icon">⬡</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-btn" data-view="new-entry">
+        <span class="nav-icon">+</span>
+        <span>New Entry</span>
+      </button>
+      <button class="nav-btn" data-view="history">
+        <span class="nav-icon">≡</span>
+        <span>History</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="util-btn" id="exportBtn" title="Export JSON">↑ Export</button>
+      <button class="util-btn" id="importBtn" title="Import JSON">↓ Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" />
+    </div>
+  </aside>
+
+  <!-- ===== MOBILE TOP BAR ===== -->
+  <header class="mobile-bar">
+    <span class="brand-icon">◈</span>
+    <span class="brand-text">LOGBOOK</span>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">☰</button>
+  </header>
+
+  <!-- ===== MOBILE NAV OVERLAY ===== -->
+  <div class="mobile-nav-overlay" id="mobileOverlay">
+    <div class="mobile-nav">
+      <button class="mobile-close" id="mobileClose">✕</button>
+      <button class="nav-btn active" data-view="dashboard" data-mobile>
+        <span class="nav-icon">⬡</span><span>Dashboard</span>
+      </button>
+      <button class="nav-btn" data-view="new-entry" data-mobile>
+        <span class="nav-icon">+</span><span>New Entry</span>
+      </button>
+      <button class="nav-btn" data-view="history" data-mobile>
+        <span class="nav-icon">≡</span><span>History</span>
+      </button>
+      <div class="mobile-util">
+        <button class="util-btn" id="exportBtnMobile">↑ Export</button>
+        <button class="util-btn" id="importBtnMobile">↓ Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <!-- ── DASHBOARD VIEW ── -->
+    <section class="view active" id="view-dashboard">
+      <div class="view-header">
+        <h1 class="view-title">Dashboard</h1>
+        <div class="today-status" id="todayStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">Loading…</span>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Hours</div>
+          <div class="stat-value" id="totalHours">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Current Streak</div>
+          <div class="stat-value" id="currentStreak">0<span class="stat-unit">d</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Entries</div>
+          <div class="stat-value" id="totalEntries">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">This Week</div>
+          <div class="stat-value" id="weekHours">0<span class="stat-unit">h</span></div>
+        </div>
+      </div>
+
+      <!-- Motivational line -->
+      <div class="motivation-bar" id="motivationBar">
+        <span class="motivation-icon">◈</span>
+        <span id="motivationText">Start logging to unlock insights.</span>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="section-block">
+        <div class="section-title">Last 7 Days Activity</div>
+        <div class="heatmap-row" id="heatmapRow"></div>
+        <div class="heatmap-legend">
+          <span>Less</span>
+          <div class="legend-box" data-level="0"></div>
+          <div class="legend-box" data-level="1"></div>
+          <div class="legend-box" data-level="2"></div>
+          <div class="legend-box" data-level="3"></div>
+          <div class="legend-box" data-level="4"></div>
+          <span>More</span>
+        </div>
+      </div>
+
+      <!-- Recent entries -->
+      <div class="section-block">
+        <div class="section-title">Recent Entries</div>
+        <div id="recentEntriesList" class="recent-list"></div>
+      </div>
+    </section>
+
+    <!-- ── NEW ENTRY VIEW ── -->
+    <section class="view" id="view-new-entry">
+      <div class="view-header">
+        <h1 class="view-title" id="formTitle">New Entry</h1>
+        <span class="form-date" id="formDate"></span>
+      </div>
+
+      <div class="form-card">
+        <input type="hidden" id="editId" value="" />
+
+        <div class="form-row two-col">
+          <div class="form-group">
+            <label for="entryDate">Date</label>
+            <input type="date" id="entryDate" />
+          </div>
+          <div class="form-group">
+            <label for="studyHours">Study Hours</label>
+            <input type="number" id="studyHours" min="0" max="24" step="0.5" placeholder="e.g. 3.5" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="topicStudied">Topic Studied</label>
+          <input type="text" id="topicStudied" placeholder="e.g. React hooks, Data Structures…" />
+        </div>
+
+        <div class="form-group">
+          <label for="practiceDone">Practice Done</label>
+          <input type="text" id="practiceDone" placeholder="e.g. Built a todo app, solved 3 LeetCode problems…" />
+        </div>
+
+        <div class="form-group">
+          <label for="keyLearning">Key Learning</label>
+          <textarea id="keyLearning" rows="3" placeholder="What's the most important thing you learned today?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="mistakesMade">Mistakes Made</label>
+          <textarea id="mistakesMade" rows="2" placeholder="What went wrong? What would you do differently?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes <span class="optional-tag">optional</span></label>
+          <textarea id="notes" rows="2" placeholder="Anything else worth noting…"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-cancel" id="cancelEdit" style="display:none">Cancel</button>
+          <button class="btn-primary" id="saveEntryBtn">Save Entry</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HISTORY VIEW ── -->
+    <section class="view" id="view-history">
+      <div class="view-header">
+        <h1 class="view-title">History</h1>
+        <div class="history-search-wrap">
+          <input type="text" id="historySearch" placeholder="Search entries…" class="search-input" />
+        </div>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+  </main>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
